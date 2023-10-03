@@ -6,30 +6,39 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
+    highlight: haddock
+  word_document: default
 fontsize: 5pt
-editor_options: 
+editor_options:
   chunk_output_type: inline
 ---
 
-```{r setup, include=FALSE, eval=TRUE}
+```{r setup, include=F, eval=T}
 library(knitr)
 opts_chunk$set(tidy.opts = list(width.cutoff = 65), tidy = F)
+opts_chunk$set(fig.align = 'center', fig.width = 6)
+
 ```
 
 #### Dependencies
 *
 Pipeline depends on the following packages: 'tidyverse', 'ggrepel', 'remotes', and 'ggpubr' among the rest.
 
-```{r libraries, eval=T, message=FALSE, include=TRUE, results=FALSE, warning=FALSE}
+```{r libraries, eval=T, message=F, include=T, results=F, warning=F}
+
 # Load libraries
-load_libs <- c('tidyverse', 'ggrepel', 'remotes', 'ggpubr', 'kableExtra', "tinytex")
+load_libs <- c('tidyverse', 'ggrepel', 'remotes', 'ggpubr', 
+               'kableExtra', "tinytex", 'summarytools', 'remotes')
+
 sapply(load_libs, require, character.only = T)
+
 ```
 
 ### Task 4a - Using R example datasets
 *
 **CO2 dataset**
 ```{r }
+
 # CO2 data set
 # Attach data and take a look
 data(CO2)
@@ -43,6 +52,7 @@ co2_summary <- CO2 %>% group_by(Type) %>% summarise(mean = mean(uptake),
 # Print table
 kable(co2_summary, caption = 'CO2 data set.', format = 'latex', booktabs = T) %>%
             kable_styling(latex_options = c('striped',"HOLD_position"))
+
 ```
 Description: The CO2 data frame has 84 rows and 5 columns of data from an experiment on the cold tolerance of the grass species Echinochloa crus-galli.
 
@@ -51,7 +61,8 @@ Description: The CO2 data frame has 84 rows and 5 columns of data from an experi
 ### Task 4b - Using R example datasets
 *
 **Airway dataset**
-```{r airway, eval=T, message=FALSE, include=TRUE, warning=FALSE}
+```{r airway, eval=T, message=F, include=T, warning=F, cache=T}
+
 # Install airway if not already present
 # BiocManager::install("airway")
 library(airway)
@@ -61,8 +72,9 @@ data(airway)
 counts <- assay(airway) %>% as.data.frame()
 
 # Use tidyverse to calulate no. of expressed and non expressed genes per sample
-counts_summary <- counts %>% summarise_all(.funs = list(expressed = function(x) sum(x > 0),
-                                             notExpressed = function(x) sum(x == 0))) %>% 
+counts_summary <- counts %>% 
+          summarise_all(.funs = list(expressed = function(x) sum(x > 0),
+                                     notExpressed = function(x) sum(x == 0))) %>% 
           pivot_longer(cols = everything()) %>% 
           separate(name, c('Sample', 'temp'),sep = '_') %>% 
           pivot_wider(names_from = 'temp', values_from = 'value')
@@ -71,6 +83,7 @@ counts_summary <- counts %>% summarise_all(.funs = list(expressed = function(x) 
 kable(counts_summary, caption = 'Airway dataset.', 
       format = 'latex', booktabs = T) %>%
             kable_styling(latex_options = c('striped',"HOLD_position"))
+
 ```
 Description: Number of expressed and non-expressed genes per sample.
 
@@ -80,7 +93,8 @@ Description: Number of expressed and non-expressed genes per sample.
 1. mean-to-median ratio
 2. trimmed mean
 
-```{r functions, eval=T, message=FALSE, include=TRUE}
+```{r functions, eval=T, message=F, include=T, cache=T}
+
 # Create a random numeric vector with fixed seed for reproducibility 
 set.seed(1)
 numval <- sample(1:100, 50)
@@ -105,6 +119,7 @@ trimmedMean <- function(x){
 
 # Call the function using previously created numeric vector
 trimmedMean(numval)
+
 ```
 \pagebreak
 
@@ -144,9 +159,84 @@ Furthermore, the apply-family functions promote code modularity and maintainabil
 \pagebreak
 
 ### Task 6 - Basic visualization with R
+*
+Magic guys data set - base r
 
-```{r, eval=T, message=FALSE, include=TRUE}
-library('remotes')
+```{r, fig.height=4, fig.width=10 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi heigth using base R functions'}
+
+# Read in magic_guys and look at the summary by species
+magic_guys <- read.csv('./data/magic_guys.csv')
+#magic_guys %>% group_by(species) %>% dfSummary()
+
+# Compare the hist visualization using base and ggplot
+## First plot - left half of x-axis, right margin set to 0 lines
+par(fig = c(0, .5, 0, 1), mar = c(5,2,4,0))
+hist(magic_guys$length[magic_guys$species == 'jedi'], 
+     xlim = c(50, 300),
+     breaks = 5, ann = FALSE, las = 1)
+
+## Cecond plot - right half of x-axis, left margin set to 0 lines
+par(fig = c(.5, 1, 0, 1), mar = c(5,0,4,2), new = TRUE)
+hist(magic_guys$length[magic_guys$species == 'jedi'], 
+     xlim = c(50, 300),
+     breaks = 10, ann = FALSE, axes = FALSE)
+
+axis(1)
+axis(2, lwd.ticks = 0, labels = FALSE)
+
+title(main = '', xlab = 'Breaks 5 (left) and 10 (right)', 
+      outer = TRUE, line = -2)
+
+```
+
+\pagebreak
+
+*
+Magic guys data set - ggplot
+
+```{r, fig.height=5, fig.width=10 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi and Sith heigth using ggplot.'}
+# use ggplot for histogram
+magic_guys_dp <- magic_guys %>% mutate(species = paste0(species, ': bin 10')) %>% 
+                             bind_rows(magic_guys %>% 
+                                         mutate(species = paste0(species, ': bin 20')))
+
+ggplot(magic_guys_dp, aes(x = length)) + 
+   geom_histogram(data=subset(magic_guys_dp, species=="jedi: bin 10"), 
+                  binwidth=10, color = 'black', fill = alpha('#7ea4b3', 0.5)) +
+   geom_histogram(data=subset(magic_guys_dp, species=="jedi: bin 20"), 
+                  binwidth=20, color = 'black', fill = '#7ea4b3') +
+   geom_histogram(data=subset(magic_guys_dp, species=="sith: bin 10"), 
+                  binwidth=10, color = 'black', fill = alpha('#cfb7ae', 0.5)) +
+   geom_histogram(data=subset(magic_guys_dp, species=="sith: bin 20"), 
+                  binwidth=20, color = 'black', fill = '#cfb7ae') +
+   facet_grid(~species, scales="free_x") +
+  labs(y = 'Counts', x = 'Length') +
+    theme_bw()
+
+```
+
+\pagebreak
+
+```{r, fig.height=4, fig.width=10 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Sith heigth using base R functions'}
+
+# compare the hist visualization using base and ggplot
+## first plot - left half of x-axis, right margin set to 0 lines
+par(fig = c(0, .5, 0, 1), mar = c(5,2,4,0))
+hist(magic_guys$length[magic_guys$species == 'sith'], 
+     xlim = c(50, 200),
+     breaks = 5, ann = FALSE, las = 1)
+
+## second plot - right half of x-axis, left margin set to 0 lines
+par(fig = c(.5, 1, 0, 1), mar = c(5,0,4,2), new = TRUE)
+hist(magic_guys$length[magic_guys$species == 'sith'], 
+     xlim = c(50, 200),
+     breaks = 10, ann = FALSE, axes = FALSE)
+
+axis(1)
+axis(2, lwd.ticks = 0, labels = FALSE)
+
+title(main = '', xlab = 'Breaks 5 (left) and 10 (right)', 
+      outer = TRUE, line = -2)
 
 ```
 
@@ -156,7 +246,8 @@ library('remotes')
 *
 Chromosome data set
 
-```{r chromosome, warning=FALSE}
+```{r chromosome, warning=F, cache=T}
+
 # Install tidybiology
 # devtools::install_github("hirscheylab/tidybiology")
 library(tidybiology)
@@ -186,7 +277,7 @@ kable(chromosome_summary, caption = 'Chromosome dataset.',
 
 \pagebreak
 
-```{r, fig.asp=.65, fig.width=6, fig.align='center', message=FALSE, fig.cap='Chromosome data set. Distribution of Chromosome Sizes.'}
+```{r, fig.asp=.65, message=F, cache=T, fig.cap='Chromosome data set. Distribution of Chromosome Sizes.'}
 # B. 
 # Plot distribution of the chromosome size
 # Change plot theme and axis labels
@@ -204,7 +295,8 @@ ggplot(chromosome, aes(x = length_mm)) +
 
 \pagebreak
 
-```{r, fig.asp=.65, fig.width=6, fig.align='center', message=FALSE, warning=FALSE, fig.cap='Chromosome data set. Association between chromosome length and number of protein coding genes.'}
+```{r, fig.asp=.65,  message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between chromosome length and number of protein coding genes.'}
+
 # C. 
 # Plot length and number of protein coding genes
 # Add the line and spearman correlation
@@ -217,11 +309,13 @@ ggplot(chromosome, aes(length_mm, protein_codinggenes)) +
         theme_bw() +
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
+
 ```
 
 \pagebreak
 
-```{r, fig.asp=.65, fig.width=6, fig.align='center', message=FALSE, warning=FALSE, fig.cap='Chromosome data set. Association between number of protein coding genes and miRNA.'}
+```{r, fig.asp=.65, message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between number of protein coding genes and miRNA.'}
+
 # D. 
 # plot length and number of miRNA
 # add the line and spearman correaltion
@@ -234,6 +328,7 @@ ggplot(chromosome, aes(mi_rna, protein_codinggenes)) +
         theme_bw() +
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
+
 ```
 
 \pagebreak
@@ -242,7 +337,8 @@ ggplot(chromosome, aes(mi_rna, protein_codinggenes)) +
 *
 Protein data set
 
-```{r protein, fig.asp=.65, fig.width=6, fig.align='center', message=FALSE, warning=FALSE, fig.cap="Protein data set. Relationship between Protein Length and Protein Mass."}
+```{r protein, fig.asp=.65, message=F, warning=F, cache=T, fig.cap="Protein data set. Relationship between Protein Length and Protein Mass."}
+
 # Attach the data
 data("proteins")
 
@@ -289,4 +385,5 @@ ggplot(proteins, aes(x = length, y = mass)) +
         geom_vline(xintercept = protein_summary$length_median, 
                    linetype = "dashed", 
                    color = "gray") 
+
 ```
