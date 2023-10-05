@@ -16,7 +16,7 @@ editor_options:
 ```{r setup, include=F, eval=T}
 library(knitr)
 opts_chunk$set(tidy.opts = list(width.cutoff = 65), tidy = F)
-opts_chunk$set(fig.align = 'center', fig.width = 6)
+#opts_chunk$set(fig.align = 'center', fig.width = 6)
 
 ```
 
@@ -89,9 +89,9 @@ Description: Number of expressed and non-expressed genes per sample.
 
 \pagebreak
 
-### Task 5 - Creating R Functions
-1. mean-to-median ratio
-2. trimmed mean
+## Task 5 - Creating R Functions
+1. Write a function that calculates the ratio of the mean and the median of a given vector.
+2. Write a function that ignores the lowest and the highest value from a given vector and calculate the mean.
 
 ```{r functions, eval=T, message=F, include=T, cache=T}
 
@@ -123,7 +123,7 @@ trimmedMean(numval)
 ```
 \pagebreak
 
-### Why, how, and when not to use pipes.
+### 3. Write a short explanation of why, how, and when not to use pipes.
 
 The use of pipes (%>%) in R, often provided by packages like **magrittr** and widely adopted by the **dplyr** package, has become a popular tool for enhancing the readability and efficiency of R code. However, there are situations where using pipes may not be the best choice, and understanding when not to use them is crucial for writing clean and maintainable R code.
 
@@ -144,7 +144,7 @@ However, here are scenarios where using pipes may not be ideal:
 *
 **Code Style and Team Consistency:** If you're working on a team project, it's essential to maintain code consistency. Some team members may prefer traditional R syntax over pipes, so it's crucial to follow the project's coding guidelines.
 
-### Apply-family of functions
+### 4. Write a short explanation of why they could be useful in your work.
 
 The apply-family of functions, including **apply**, **lapply**, **sapply**, and others, play a pivotal role in streamlining and enhancing the efficiency of data analysis and manipulation tasks within my work. These functions provide a concise and flexible way to apply operations across data structures in R, such as matrices, lists, and data frames.
 
@@ -158,93 +158,203 @@ Furthermore, the apply-family functions promote code modularity and maintainabil
 
 \pagebreak
 
-### Task 6 - Basic visualization with R
-*
-Magic guys data set - base r
+## Task 6 - Basic visualization with R
+### 1. Compare the distributions of the body heights of  two species from the 'magic_guys.csv' dataset.
 
-```{r, fig.height=4, fig.width=10 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi heigth using base R functions'}
+A. using the basic 'hist' function as well as ‘ggplot’ and ‘geom_histogram’ functions from the ggplot2 package. Optimize the plots for example by trying several different 'breaks'. Note that ggplot2-based functions give you many more options for changing the visualization parameters, try some of them.
+
+```{r, fig.width=8, eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi and Sith heigth using base R functions'}
 
 # Read in magic_guys and look at the summary by species
 magic_guys <- read.csv('./data/magic_guys.csv')
 #magic_guys %>% group_by(species) %>% dfSummary()
 
 # Compare the hist visualization using base and ggplot
-## First plot - left half of x-axis, right margin set to 0 lines
-par(fig = c(0, .5, 0, 1), mar = c(5,2,4,0))
+## First plot 
+par(mfrow=c(1, 2))
 hist(magic_guys$length[magic_guys$species == 'jedi'], 
-     xlim = c(50, 300),
+     breaks = 5, las = 1, ylab = 'Frequency', xlab = '', main = '')
+
+## Second plot 
+hist(magic_guys$length[magic_guys$species == 'sith'], 
      breaks = 5, ann = FALSE, las = 1)
 
-## Cecond plot - right half of x-axis, left margin set to 0 lines
-par(fig = c(.5, 1, 0, 1), mar = c(5,0,4,2), new = TRUE)
-hist(magic_guys$length[magic_guys$species == 'jedi'], 
-     xlim = c(50, 300),
-     breaks = 10, ann = FALSE, axes = FALSE)
-
-axis(1)
-axis(2, lwd.ticks = 0, labels = FALSE)
-
-title(main = '', xlab = 'Breaks 5 (left) and 10 (right)', 
+## Title
+title(main = '', xlab = 'Jedi (left) and Sith height (right) by using break = 5', 
       outer = TRUE, line = -2)
 
 ```
 
 \pagebreak
 
-*
-Magic guys data set - ggplot
+- Use hist function from base R to compare distribution of Jedi and Sith height
+- Using breaks = 10
+
+```{r,  fig.width=8 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi and Sith heigth using base R functions'}
+
+# Compare the hist visualization using base and ggplot
+## First plot - left half of x-axis, right margin set to 0 lines
+par(mfrow=c(1, 2))
+hist(magic_guys$length[magic_guys$species == 'jedi'], 
+     xlim = c(50, 300), 
+     breaks = 10, las = 1, ylab = 'Frequency', xlab = '', main = '')
+
+## Cecond plot - right half of x-axis, left margin set to 0 lines
+hist(magic_guys$length[magic_guys$species == 'sith'], 
+     breaks = 10, ann = FALSE, las = 1)
+
+title(main = '', xlab = 'Jedi (left) and Sith height (right) by using break = 10', 
+      outer = TRUE, line = -2)
+
+```
+
+\pagebreak
+
+- Use geom_histogram function from ggplot library to compare distribution of Jedi and Sith height
+- Using binwidth = 10 and 20
 
 ```{r, fig.height=5, fig.width=10 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi and Sith heigth using ggplot.'}
-# use ggplot for histogram
+
+# Use ggplot for histogram
+# Here we do everything in parallel
+## Small workaround - duplicated magic_guys and convert species to character
 magic_guys_dp <- magic_guys %>% mutate(species = paste0(species, ': bin 10')) %>% 
                              bind_rows(magic_guys %>% 
                                          mutate(species = paste0(species, ': bin 20')))
 
+# Plot the data using several layers of histogram referring to bandwidth used
 ggplot(magic_guys_dp, aes(x = length)) + 
-   geom_histogram(data=subset(magic_guys_dp, species=="jedi: bin 10"), 
-                  binwidth=10, color = 'black', fill = alpha('#7ea4b3', 0.5)) +
-   geom_histogram(data=subset(magic_guys_dp, species=="jedi: bin 20"), 
-                  binwidth=20, color = 'black', fill = '#7ea4b3') +
-   geom_histogram(data=subset(magic_guys_dp, species=="sith: bin 10"), 
-                  binwidth=10, color = 'black', fill = alpha('#cfb7ae', 0.5)) +
-   geom_histogram(data=subset(magic_guys_dp, species=="sith: bin 20"), 
-                  binwidth=20, color = 'black', fill = '#cfb7ae') +
-   facet_grid(~species, scales="free_x") +
-  labs(y = 'Counts', x = 'Length') +
-    theme_bw()
+     geom_histogram(data=subset(magic_guys_dp, species=="jedi: bin 10"), 
+                    binwidth=10, color = 'black', fill = alpha('#7ea4b3', 0.5)) +
+     geom_histogram(data=subset(magic_guys_dp, species=="jedi: bin 20"), 
+                    binwidth=20, color = 'black', fill = '#7ea4b3') +
+     geom_histogram(data=subset(magic_guys_dp, species=="sith: bin 10"), 
+                    binwidth=10, color = 'black', fill = alpha('#cfb7ae', 0.5)) +
+     geom_histogram(data=subset(magic_guys_dp, species=="sith: bin 20"), 
+                    binwidth=20, color = 'black', fill = '#cfb7ae') +
+     facet_grid(~species, scales="free_x") +
+     labs(y = 'Counts', x = 'Heigth') +
+     theme_bw()
 
 ```
 
 \pagebreak
 
-```{r, fig.height=4, fig.width=10 ,eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Sith heigth using base R functions'}
+B. Do the same comparison as in a. but with boxplots. If you want to use the ggplot2-package, use the functions ‘ggplot’ and ‘geom_boxplot’.
 
-# compare the hist visualization using base and ggplot
-## first plot - left half of x-axis, right margin set to 0 lines
-par(fig = c(0, .5, 0, 1), mar = c(5,2,4,0))
-hist(magic_guys$length[magic_guys$species == 'sith'], 
-     xlim = c(50, 200),
-     breaks = 5, ann = FALSE, las = 1)
 
-## second plot - right half of x-axis, left margin set to 0 lines
-par(fig = c(.5, 1, 0, 1), mar = c(5,0,4,2), new = TRUE)
-hist(magic_guys$length[magic_guys$species == 'sith'], 
-     xlim = c(50, 200),
-     breaks = 10, ann = FALSE, axes = FALSE)
+```{r, fig.width=6, fig.asp=.50, eval=T, message=F, include=T, cache=T, fig.cap='Boxplot of Jedi and Sith heigth using ggplot.'}
 
-axis(1)
-axis(2, lwd.ticks = 0, labels = FALSE)
+# Use ggplot and geom_boxplot and fill by species 
+## change the theme and colors
+ggplot(magic_guys, (aes(species, length))) + 
+        geom_boxplot(aes(fill = species), show.legend = F, notch = T) +
+        scale_fill_manual(values = c('#DFB359', '#374684')) +
+        scale_x_discrete(labels = str_to_title(unique(magic_guys$species))) +
+        coord_flip() +
+        labs(x = 'Species', y = 'Heigth') +
+        theme_bw() +
+        theme(panel.grid = element_blank())
+  
+```
 
-title(main = '', xlab = 'Breaks 5 (left) and 10 (right)', 
-      outer = TRUE, line = -2)
+C. Save the plots with the ‘png’, ‘pdf’, and ‘svg’ formats. 
+
+```{r}
+# C.
+```
+\pagebreak
+
+## In which situation would you use which file format?
+**PNG (Portable Network Graphics):**
+
+**Use Case:** PNG is a raster graphics format, which means it's composed of pixels. It's a good choice when you want to save a plot as a static image with high-quality detail.
+
+**Situation:** Use PNG when you need to share plots online, include them in reports or presentations, or display them on a website. PNG is suitable for situations where you want to preserve the appearance of the plot, and you don't need to edit it further as it is not easily editable once saved.
+\newline
+
+**PDF (Portable Document Format):**
+
+**Use Case:** PDF is a vector format, which means it stores plots as scalable objects rather than pixels. It's great for documents and publications where you need high-quality graphics that can be resized without loss of quality.
+
+**Situation:** Use PDF when you are creating documents, reports, or presentations where the plot needs to be printed or viewed at different sizes. PDFs are also useful when you want to keep the ability to edit or extract elements from the plot later, as vector graphics are more easily editable in programs like Adobe Illustrator.
+\newline
+
+**SVG (Scalable Vector Graphics):**
+
+**Use Case:** SVG is a vector format designed specifically for scalable graphics. It's ideal for plots that need to be highly responsive and adapt to different screen sizes or resolutions.
+
+**Situation:** Use SVG when you want to embed plots in web pages, where they may be displayed on devices with various screen sizes (e.g., desktops, tablets, smartphones). SVG files are smaller in size compared to PNG and maintain sharpness at any resolution. They are also suitable for situations where you might need to modify or animate the plot using tools that support SVG editing.
+\newline
+\newline
+
+## Task 6 - Basic visualization with R
+### 2. Load the gene expression data matrix from the ‘microarray_data.tab’.
+a. How big is the matrix in terms of rows and columns?
+b. Count the missing values per gene and visualize this result.
+c. Find the genes for which there are more than X% (X=10%, 20%, 50%)
+missing values.
+d. Replace the missing values by the average expression value for the particular
+gene. (Note: Imputing data has to be used with caution!)
+
+```{r, fig.width=6, fig.asp=.5, eval=T, message=F, warning=FALSE, include=T, cache=T, fig.align='center', fig.cap='Percentage of missing values in MicroArray data set.'}
+
+# Load library you'll nned
+library(naniar)
+
+# A.
+# Read in magic_guys and look at the summary by species
+# check dimensions
+microarray <- read.csv('./data/microarray_data.tab', sep = '\t')
+dim(microarray)
+
+# Count the missing values per gene and visualize
+sum_na <- colSums(is.na(microarray))
+
+# B.
+# Lets plot this nice figure :)
+# Will use original data for that with fun from 'naniar' pck
+gg_miss_var(microarray, show_pct = TRUE) + 
+            labs(x = 'Genes', y = 'Missing values (%)')
+
+# C.
+# Genes with certain percent of missing values - use base
+ten_perc <- names(microarray)[colMeans(is.na(microarray)*100) <= 10]
+twenty_perc <- names(microarray)[colMeans(is.na(microarray)*100) <= 20]
+fifty_perc <- names(microarray)[colMeans(is.na(microarray)*100) <= 50]
+
+# D.
+# Replace missing values with the average expression value for each gene
+microarray <- microarray %>% mutate(across(everything(.), 
+                                ~ifelse(is.na(.), mean(., na.rm = TRUE), .)))
 
 ```
+
+\pagebreak
+
+## Task 6 - Basic visualization with R
+### 3. Visualize the data in the CO2 dataset in a way that gives you a deeper understanding of the data. What do you see?
+
+```{r, fig.height=6, fig.width=9, eval=T, message=F, warning=FALSE, include=T, cache=T, fig.align='center', fig.cap='The CO2 uptake of six plants from Quebec and six plants from Mississippi was measured at several levels of ambient CO2 concentration. Half the plants of each type were chilled overnight before the experiment was conducted.'}
+
+# Combine Type and treatment in one column; use facet wrap for Plant and Place
+CO2 %>% unite(Place, c(Type, Treatment), sep = '-') %>% 
+        ggplot(aes(conc, uptake)) + 
+        geom_line() + geom_point() +
+        facet_wrap(Plant~Place, scales = 'free_x', ncol = 6) +
+        labs(y = expression(paste(CO[2], ' uptake')), 
+             x = expression(paste('Ambient ', CO[2], ' concentration'))) +
+        theme_bw() + theme(panel.grid.minor.x = element_blank()) 
+  
+```
+
 
 \pagebreak
 
 ### Task 7 - Tidybiology package
-*
-Chromosome data set
+#### 1. Install the Tidybiology package, which includes the data ‘chromosome’ and ‘proteins’.
+A. Extract summary statistics (mean, median and maximum) for the following variables from the ‘chromosome’ data: variations, protein coding genes, and miRNAs. Utilize the tidyverse functions to make this as simply as possible.
+
 
 ```{r chromosome, warning=F, cache=T}
 
@@ -255,7 +365,6 @@ library(tidybiology)
 # attach chromosome data
 data("chromosome")
 
-# A. 
 # summarize target variables
 chromosome_summary <- chromosome %>% select(variations, protein_codinggenes, mi_rna) %>% 
                pivot_longer(cols = everything(), names_to = 'Variable') %>% 
@@ -277,8 +386,10 @@ kable(chromosome_summary, caption = 'Chromosome dataset.',
 
 \pagebreak
 
+B. How does the chromosome size distribute? Plot a graph that helps to visualize this by using ggplot2 package functions.
+
+
 ```{r, fig.asp=.65, message=F, cache=T, fig.cap='Chromosome data set. Distribution of Chromosome Sizes.'}
-# B. 
 # Plot distribution of the chromosome size
 # Change plot theme and axis labels
 ggplot(chromosome, aes(x = length_mm)) +
@@ -295,9 +406,12 @@ ggplot(chromosome, aes(x = length_mm)) +
 
 \pagebreak
 
+C. Does the number of protein coding genes or miRNAs correlate with the length of the chromosome? Make two separate plots to visualize these relationships.
+
+
 ```{r, fig.asp=.65,  message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between chromosome length and number of protein coding genes.'}
 
-# C. 
+# C1
 # Plot length and number of protein coding genes
 # Add the line and spearman correlation
 # Change plot theme and axis labels
@@ -314,9 +428,10 @@ ggplot(chromosome, aes(length_mm, protein_codinggenes)) +
 
 \pagebreak
 
+
 ```{r, fig.asp=.65, message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between number of protein coding genes and miRNA.'}
 
-# D. 
+# C2
 # plot length and number of miRNA
 # add the line and spearman correaltion
 # change plot theme and axis labels
@@ -333,16 +448,14 @@ ggplot(chromosome, aes(mi_rna, protein_codinggenes)) +
 
 \pagebreak
 
-### Task 7 - Tidybiology package
-*
-Protein data set
+D. Calculate the same summary statistics for the ‘proteins’ data variables length and mass. Create a meaningful visualization of the relationship between these two variables by utilizing the ggplot2 package functions. Play with the colors, theme- and other visualization parameters to create a plot that pleases you.
+
 
 ```{r protein, fig.asp=.65, message=F, warning=F, cache=T, fig.cap="Protein data set. Relationship between Protein Length and Protein Mass."}
 
 # Attach the data
 data("proteins")
 
-# E. 
 # Summary stats of protein data
 protein_summary <- proteins %>% 
           select(length, mass) %>% 
