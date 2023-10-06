@@ -1,7 +1,7 @@
 ---
 title: "Bioinformatics Analysis and Visualisation of Medical Genomics Data"
-author: "Alen Lovric"
-subtitle: Assignment 1
+author: 
+subtitle: "Assignment 1 - Alen Lovric"
 output:
   pdf_document: default
   html_document:
@@ -20,7 +20,7 @@ opts_chunk$set(tidy.opts = list(width.cutoff = 65), tidy = F)
 
 ```
 
-#### Dependencies
+### Dependencies
 *
 Pipeline depends on the following packages: 'tidyverse', 'ggrepel', 'remotes', and 'ggpubr' among the rest.
 
@@ -34,9 +34,11 @@ sapply(load_libs, require, character.only = T)
 
 ```
 
-### Task 4a - Using R example datasets
-*
-**CO2 dataset**
+### Task 4 - Using R example datasets
+###### 1. Use the R internal CO2 dataset.
+###### 2. Describe briefly the content of the CO2 dataset using the help function.
+###### 3. What is the average and median CO2 uptake of the plants from Quebec and Mississippi?
+
 ```{r }
 
 # CO2 data set
@@ -58,9 +60,8 @@ Description: The CO2 data frame has 84 rows and 5 columns of data from an experi
 
 \pagebreak
 
-### Task 4b - Using R example datasets
-*
-**Airway dataset**
+###### 4. In the “airway” example data from Bioconductor, how many genes are expressed in each sample? How many genes are not expressed in any sample?
+
 ```{r airway, eval=T, message=F, include=T, warning=F, cache=T}
 
 # Install airway if not already present
@@ -89,9 +90,9 @@ Description: Number of expressed and non-expressed genes per sample.
 
 \pagebreak
 
-## Task 5 - Creating R Functions
-1. Write a function that calculates the ratio of the mean and the median of a given vector.
-2. Write a function that ignores the lowest and the highest value from a given vector and calculate the mean.
+### Task 5 - Creating R Functions
+######  1. Write a fun that calculates the ratio of the mean and the median of a given vector.
+######  2. Write a fun that calculates mean and ignores lowest and highest value from a given vector.
 
 ```{r functions, eval=T, message=F, include=T, cache=T}
 
@@ -123,7 +124,7 @@ trimmedMean(numval)
 ```
 \pagebreak
 
-### 3. Write a short explanation of why, how, and when not to use pipes.
+###### 3. Write a short explanation of why, how, and when not to use pipes.
 
 The use of pipes (%>%) in R, often provided by packages like **magrittr** and widely adopted by the **dplyr** package, has become a popular tool for enhancing the readability and efficiency of R code. However, there are situations where using pipes may not be the best choice, and understanding when not to use them is crucial for writing clean and maintainable R code.
 
@@ -144,7 +145,7 @@ However, here are scenarios where using pipes may not be ideal:
 *
 **Code Style and Team Consistency:** If you're working on a team project, it's essential to maintain code consistency. Some team members may prefer traditional R syntax over pipes, so it's crucial to follow the project's coding guidelines.
 
-### 4. Write a short explanation of why they could be useful in your work.
+###### 4. Write a short explanation of why they could be useful in your work.
 
 The apply-family of functions, including **apply**, **lapply**, **sapply**, and others, play a pivotal role in streamlining and enhancing the efficiency of data analysis and manipulation tasks within my work. These functions provide a concise and flexible way to apply operations across data structures in R, such as matrices, lists, and data frames.
 
@@ -158,10 +159,10 @@ Furthermore, the apply-family functions promote code modularity and maintainabil
 
 \pagebreak
 
-## Task 6 - Basic visualization with R
-### 1. Compare the distributions of the body heights of  two species from the 'magic_guys.csv' dataset.
+### Task 6 - Basic visualization with R
+###### 1. Compare the distributions of the body heights of  two species from the 'magic_guys.csv' dataset.
 
-A. using the basic 'hist' function as well as ‘ggplot’ and ‘geom_histogram’ functions from the ggplot2 package. Optimize the plots for example by trying several different 'breaks'. Note that ggplot2-based functions give you many more options for changing the visualization parameters, try some of them.
+###### A. using the basic 'hist' function as well as ‘ggplot’ and ‘geom_histogram’ functions from the ggplot2 package. Optimize the plots for example by trying several different 'breaks'. Note that ggplot2-based functions give you many more options for changing the visualization parameters, try some of them.
 
 ```{r, fig.width=8, eval=T, message=F, include=T, cache=T, fig.cap='Histogram of Jedi and Sith heigth using base R functions'}
 
@@ -240,32 +241,41 @@ ggplot(magic_guys_dp, aes(x = length)) +
 
 \pagebreak
 
-B. Do the same comparison as in a. but with boxplots. If you want to use the ggplot2-package, use the functions ‘ggplot’ and ‘geom_boxplot’.
+###### B. Do the same comparison as in a. but with boxplots. If you want to use the ggplot2-package, use the functions ‘ggplot’ and ‘geom_boxplot’.
 
 
 ```{r, fig.width=6, fig.asp=.50, eval=T, message=F, include=T, cache=T, fig.cap='Boxplot of Jedi and Sith heigth using ggplot.'}
 
 # Use ggplot and geom_boxplot and fill by species 
 ## change the theme and colors
-ggplot(magic_guys, (aes(species, length))) + 
-        geom_boxplot(aes(fill = species), show.legend = F, notch = T) +
-        scale_fill_manual(values = c('#DFB359', '#374684')) +
-        scale_x_discrete(labels = str_to_title(unique(magic_guys$species))) +
-        coord_flip() +
-        labs(x = 'Species', y = 'Heigth') +
-        theme_bw() +
-        theme(panel.grid = element_blank())
-  
+gg <- ggplot(magic_guys, (aes(species, length))) + 
+            geom_boxplot(aes(fill = species), show.legend = F, notch = T) +
+            scale_fill_manual(values = c('#DFB359', '#374684')) +
+            scale_x_discrete(labels = str_to_title(unique(magic_guys$species))) +
+            coord_flip() +
+            labs(x = 'Species', y = 'Heigth') +
+            theme_bw() +
+            theme(panel.grid = element_blank())
+
+plot(gg)  
 ```
 
-C. Save the plots with the ‘png’, ‘pdf’, and ‘svg’ formats. 
+###### C. Save the plots with the ‘png’, ‘pdf’, and ‘svg’ formats.In which situation would you use which file format?
 
-```{r}
-# C.
+```{r, warning=FALSE, message=F, cache=T, results=F}
+# Here we save only ggplot fig. using ggsave function
+## We can do the same opening and closing  different developer such as pdf; dev.off
+save_here <- './figures/'
+save_type <- c('pdf', 'svg', 'png')
+
+# Use lapply to save all 3 
+lapply(1:3, function(i) {
+  ggsave(filename = paste0(save_here, 'Jedi_vs_Sith.', save_type[i]),
+        device = save_type[i], width = 6, height = 4)
+})
 ```
 \pagebreak
 
-## In which situation would you use which file format?
 **PNG (Portable Network Graphics):**
 
 **Use Case:** PNG is a raster graphics format, which means it's composed of pixels. It's a good choice when you want to save a plot as a static image with high-quality detail.
@@ -288,16 +298,14 @@ C. Save the plots with the ‘png’, ‘pdf’, and ‘svg’ formats.
 \newline
 \newline
 
-## Task 6 - Basic visualization with R
-### 2. Load the gene expression data matrix from the ‘microarray_data.tab’.
-a. How big is the matrix in terms of rows and columns?
-b. Count the missing values per gene and visualize this result.
-c. Find the genes for which there are more than X% (X=10%, 20%, 50%)
-missing values.
-d. Replace the missing values by the average expression value for the particular
-gene. (Note: Imputing data has to be used with caution!)
+###### 2. Load the gene expression data matrix from the ‘microarray_data.tab’.
 
-```{r, fig.width=6, fig.asp=.5, eval=T, message=F, warning=FALSE, include=T, cache=T, fig.align='center', fig.cap='Percentage of missing values in MicroArray data set.'}
+###### A. How big is the matrix in terms of rows and columns?
+###### B. Count the missing values per gene and visualize this result.
+###### C. Find the genes for which there are more than X% (X=10%, 20%, 50%) missing values.
+###### D. Replace the missing values by the average expression value for the particular gene.
+
+```{r, fig.width=8, fig.asp=.45, eval=T, message=F, warning=FALSE, include=T, cache=T, fig.align='center', fig.cap='Percentage of missing values in MicroArray data set before (left) and after (rigth) missing values replacement.'}
 
 # Load library you'll nned
 library(naniar)
@@ -314,8 +322,8 @@ sum_na <- colSums(is.na(microarray))
 # B.
 # Lets plot this nice figure :)
 # Will use original data for that with fun from 'naniar' pck
-gg_miss_var(microarray, show_pct = TRUE) + 
-            labs(x = 'Genes', y = 'Missing values (%)')
+gg_before <- gg_miss_var(microarray, show_pct = TRUE) + 
+                  labs(x = 'Genes', y = 'Missing values (%)')
 
 # C.
 # Genes with certain percent of missing values - use base
@@ -328,12 +336,17 @@ fifty_perc <- names(microarray)[colMeans(is.na(microarray)*100) <= 50]
 microarray <- microarray %>% mutate(across(everything(.), 
                                 ~ifelse(is.na(.), mean(., na.rm = TRUE), .)))
 
-```
+# Will use original data for that with fun from 'naniar' pck
+gg_after <- gg_miss_var(microarray, show_pct = TRUE) + 
+                  labs(x = 'Genes', y = 'Missing values (%)')
 
+#Combine the plots with ggarrange and plot
+ggarrange(gg_before, gg_after)
+```
+Comment: It seems some genes do not express at all!
 \pagebreak
 
-## Task 6 - Basic visualization with R
-### 3. Visualize the data in the CO2 dataset in a way that gives you a deeper understanding of the data. What do you see?
+###### 3. Visualize the data in the CO2 dataset in a way that gives you a deeper understanding of the data. What do you see?
 
 ```{r, fig.height=6, fig.width=9, eval=T, message=F, warning=FALSE, include=T, cache=T, fig.align='center', fig.cap='The CO2 uptake of six plants from Quebec and six plants from Mississippi was measured at several levels of ambient CO2 concentration. Half the plants of each type were chilled overnight before the experiment was conducted.'}
 
@@ -352,8 +365,9 @@ CO2 %>% unite(Place, c(Type, Treatment), sep = '-') %>%
 \pagebreak
 
 ### Task 7 - Tidybiology package
-#### 1. Install the Tidybiology package, which includes the data ‘chromosome’ and ‘proteins’.
-A. Extract summary statistics (mean, median and maximum) for the following variables from the ‘chromosome’ data: variations, protein coding genes, and miRNAs. Utilize the tidyverse functions to make this as simply as possible.
+###### 1. Install the Tidybiology package, which includes the data ‘chromosome’ and ‘proteins’.
+
+###### A. Extract summary statistics (mean, median and maximum) for the following variables from the ‘chromosome’ data: variations, protein coding genes, and miRNAs. Utilize the tidyverse functions to make this as simply as possible.
 
 
 ```{r chromosome, warning=F, cache=T}
@@ -386,7 +400,7 @@ kable(chromosome_summary, caption = 'Chromosome dataset.',
 
 \pagebreak
 
-B. How does the chromosome size distribute? Plot a graph that helps to visualize this by using ggplot2 package functions.
+###### B. How does the chromosome size distribute? Plot a graph that helps to visualize this by using ggplot2 package functions.
 
 
 ```{r, fig.asp=.65, message=F, cache=T, fig.cap='Chromosome data set. Distribution of Chromosome Sizes.'}
@@ -406,7 +420,7 @@ ggplot(chromosome, aes(x = length_mm)) +
 
 \pagebreak
 
-C. Does the number of protein coding genes or miRNAs correlate with the length of the chromosome? Make two separate plots to visualize these relationships.
+###### C. Does the number of protein coding genes or miRNAs correlate with the length of the chromosome? Make two separate plots to visualize these relationships.
 
 
 ```{r, fig.asp=.65,  message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between chromosome length and number of protein coding genes.'}
@@ -448,7 +462,7 @@ ggplot(chromosome, aes(mi_rna, protein_codinggenes)) +
 
 \pagebreak
 
-D. Calculate the same summary statistics for the ‘proteins’ data variables length and mass. Create a meaningful visualization of the relationship between these two variables by utilizing the ggplot2 package functions. Play with the colors, theme- and other visualization parameters to create a plot that pleases you.
+###### D. Calculate the same summary statistics for the ‘proteins’ data variables length and mass. Create a meaningful visualization of the relationship between these two variables by utilizing the ggplot2 package functions. Play with the colors, theme- and other visualization parameters to create a plot that pleases you.
 
 
 ```{r protein, fig.asp=.65, message=F, warning=F, cache=T, fig.cap="Protein data set. Relationship between Protein Length and Protein Mass."}
