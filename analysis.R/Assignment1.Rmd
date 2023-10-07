@@ -429,7 +429,7 @@ ggplot(chromosome, aes(x = length_mm)) +
 # Plot length and number of protein coding genes
 # Add the line and spearman correlation
 # Change plot theme and axis labels
-ggplot(chromosome, aes(length_mm, protein_codinggenes)) + 
+ggplot(chromosome, aes(x = length_mm, y = protein_codinggenes)) + 
         geom_point() +
         geom_smooth(method = 'lm', fill = 'gray', alpha = 0.3) +
         stat_cor(method = 'spearman', cor.coef.name = 'rho') + 
@@ -443,17 +443,17 @@ ggplot(chromosome, aes(length_mm, protein_codinggenes)) +
 \pagebreak
 
 
-```{r, fig.asp=.65, message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between number of protein coding genes and miRNA.'}
+```{r, fig.asp=.65, message=F, warning=F, cache=T, fig.cap='Chromosome data set. Association between chromosome length and miRNA.'}
 
 # C2
 # plot length and number of miRNA
 # add the line and spearman correaltion
 # change plot theme and axis labels
-ggplot(chromosome, aes(mi_rna, protein_codinggenes)) + 
+ggplot(chromosome, aes(x = length_mm, y = mi_rna)) + 
         geom_point() +
-        stat_cor(lmethod = 'spearman', cor.coef.name = 'rho') + 
+        stat_cor(lmethod = 'spearman', cor.coef.name = 'rho', label.y = 140) + 
         geom_smooth(method = 'lm', fill = 'gray', alpha = 0.3) +
-        labs(x = 'Protein coding genes', y = 'miRNA') +
+        labs(x = 'Chromosome size (mm)', y = 'miRNA', ) +
         theme_bw() +
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
